@@ -1,0 +1,42 @@
+SYSTEM = Co-NGO-c4
+# initial setup
+ISTART = 1
+ICHARG = 11
+PREC = Normal
+LREAL = .F.
+IVDW = 12
+LDIPOL = .T.
+IDIPOL = 3
+# PROCAR
+LORBIT = 10 #Band or DOS
+NBANDS = 650
+EMIN = -5
+EMAX = 5
+NEDOS = 1000
+# atomic relax
+IBRION = -1 #
+ISIF = 2
+NSW = 0
+POTIM = 0.05
+EDIFFG = -0.01
+# electron relax
+ENCUT = 500 eV
+NELM = 100
+EDIFF = 1E-5
+ISMEAR = 0
+SIGMA = 0.05
+NELMDL = -15
+NELMIN = 4
+LHFCALC = .T. # PBE0
+GGA = PE # PBE0
+ALGO = Damped
+TIME = 0.5
+# CHG WAVE
+LCHARG = .T.
+LWAVE = .T.
+# spin
+ISPIN = 2
+# symmetry
+ISYM = 0
+# accelerate
+NCORE = 8

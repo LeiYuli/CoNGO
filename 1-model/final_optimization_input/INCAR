@@ -1,0 +1,33 @@
+SYSTEM = NGO
+# initial setup
+ISTART = 0
+ICHARG = 2
+PREC = Normal
+LREAL = .F.
+IVDW = 12
+LDIPOL = .T.
+IDIPOL = 3
+# atomic relax
+IBRION = 1 #
+ISIF = 2
+NSW = 100
+POTIM = 0.05
+EDIFFG = -0.01
+# electron relax
+ENCUT = 500 eV
+NELM = 60
+EDIFF = 1E-5
+ALGO = N
+ISMEAR = 0
+SIGMA = 0.1
+NELMDL = -15
+NELMIN = 4
+# CHG WAVE
+LCHARG = .F.
+LWAVE = .F.
+# spin
+ISPIN = 1
+# symmetry
+ISYM = 0
+# accelerate
+NCORE = 8
