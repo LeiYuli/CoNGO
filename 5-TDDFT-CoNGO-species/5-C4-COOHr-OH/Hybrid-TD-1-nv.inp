@@ -1,0 +1,223 @@
+# general setup for calculations
+&GLOBAL
+    PROJECT PBE0_1_nv
+    RUN_TYPE ENERGY
+    PRINT_LEVEL MEDIUM
+&END GLOBAL
+
+# parameters for energy and force calculations
+&FORCE_EVAL
+    METHOD QUICKSTEP
+    STRESS_TENSOR None
+    
+    # define cell
+    &SUBSYS
+        # cell parameters
+        &CELL
+            CELL_FILE_FORMAT CIF
+            CELL_FILE_NAME 5-C4-COOHr-OH-opt.cif
+            PERIODIC XYZ
+        &END CELL
+        
+        # positions of atoms
+        &TOPOLOGY
+            COORD_FILE_FORMAT CIF
+            COORD_FILE_NAME 5-C4-COOHr-OH-opt.cif
+        &END TOPOLOGY
+        
+        # basis sets and pseudopotential of atoms
+        &KIND C
+            BASIS_SET DZVP-MOLOPT-SR-GTH-q4 #BASIS_MOLOPT
+            POTENTIAL GTH-PBE-q4 #POTENTIAL
+        &END KIND
+        &KIND N
+            BASIS_SET TZVP-MOLOPT-GTH-q5 #BASIS_MOLOPT
+            POTENTIAL GTH-PBE-q5 #POTENTIAL
+        &END KIND
+        &KIND O
+            BASIS_SET TZVP-MOLOPT-GTH-q6 #BASIS_MOLOPT
+            POTENTIAL GTH-PBE-q6 #POTENTIAL
+        &END KIND
+        &KIND H
+            BASIS_SET DZVP-MOLOPT-SR-GTH-q1 #BASIS_MOLOPT
+            POTENTIAL GTH-PBE-q1 #POTENTIAL
+        &END KIND
+        &KIND Co
+            BASIS_SET TZV2P-MOLOPT-PBE-GTH-q17 #BASIS_MOLOPT_UZH
+            POTENTIAL GTH-PBE-q17 #POTENTIAL
+            &BS
+                &ALPHA
+                    NEL -1
+                    L   2
+                    N   3	    
+                &END ALPHA
+                &BETA
+                    NEL -3
+                    L 2
+                    N 3
+                &END BETA
+	        &END BS
+        &END KIND
+    &END SUBSYS
+
+    &DFT
+        BASIS_SET_FILE_NAME BASIS_MOLOPT_UZH
+        BASIS_SET_FILE_NAME BASIS_MOLOPT
+        POTENTIAL_FILE_NAME POTENTIAL
+        WFN_RESTART_FILE_NAME ./PBE0-RESTART.wfn
+        # dipole momentum correction along one axis
+        #SURFACE_DIPOLE_CORRECTION .TRUE.
+        #SURF_DIP_DIR Z
+        MULTIPLICITY 2
+        UKS .TRUE.
+
+        &QS
+            EPS_DEFAULT 1.0E-12
+        &END QS
+
+        # eXchange-Correlation functionals and dispersion corrections
+        &XC
+            # exchange-correlation functionals
+            &XC_FUNCTIONAL # PBE0
+                &PBE
+                    SCALE_X 0.75
+                    SCALE_C 1.0
+                &END PBE
+            &END XC_FUNCTIONAL
+
+            &HF # PBE0
+                FRACTION 0.25
+                &SCREENING
+                    EPS_SCHWARZ 1E-6
+                    SCREEN_ON_INITIAL_P T
+                &END SCREENING
+                &INTERACTION_POTENTIAL
+                    POTENTIAL_TYPE TRUNCATED
+                    CUTOFF_RADIUS 6.0
+                &END INTERACTION_POTENTIAL
+                &MEMORY
+                    MAX_MEMORY 1500
+                &END MEMORY
+            &END HF
+        &END XC
+
+        # parameters for intergral grids
+        &MGRID
+            NGRIDS 4
+            # planewave cutoff
+            CUTOFF [Ry] 500
+            # < REL_CUTOFF: gaussian basis; > REL_CUTOFF: planewave
+            # typically, 50 +- 10 Ry for accurate results
+            REL_CUTOFF [Ry] 50
+        &END MGRID
+
+        # specify kpoints. Note: TDDFPT implememted in CP2K doesn't support K-samplings
+        #&KPOINTS
+        #    KPOINT 0.000000 0.000000 0.000000 1
+        #    SCHEME GENERAL
+        #    UNITS B_VECTOR
+        #&END KPOINTS
+
+        # paremeters controling SCF
+        &SCF
+            SCF_GUESS RESTART
+            # SCF convergency thresshold
+            EPS_SCF 1.0E-5
+            MAX_SCF 500
+            ADDED_MOS 50
+            CHOLESKY INVERSE
+
+            &SMEAR .FALSE. #FALSE for spin-polarized calculations
+                #METHOD ENERGY_WINDOW
+                #WINDOW_SIZE [eV] 0.05
+            &END SMEAR
+
+            # diagonalization methods and parameters
+            &DIAGONALIZATION .TRUE.
+                ALGORITHM STANDARD
+                MAX_ITER 10
+            &END DIAGONALIZATION
+
+            # mixing new and input density matrix for the next loop SCF
+            &MIXING .TRUE.
+                METHOD BROYDEN_MIXING
+                ALPHA 0.3
+                BETA 0.5
+                NBROYDEN 12
+            &END MIXING
+        &END SCF
+
+        &PRINT
+            &MO
+                ENERGIES T
+                OCCUPATION_NUMBERS T
+                &EACH
+                    QS_SCF 0
+                &END EACH
+            &END MO
+            &MO_MOLDEN
+                NDIGITS 9
+                GTO_KIND SPHERICAL
+            &END MO_MOLDEN
+            &MO_CUBES
+                NHOMO 20
+                NLUMO 20
+            &END MO_CUBES
+        &END PRINT
+    &END DFT
+
+    &PROPERTIES
+        &TDDFPT
+            NSTATES 50
+            NLUMO -1
+            RKS_TRIPLETS .FALSE.
+            KERNEL Full
+            MAX_ITER 200
+            CONVERGENCE [eV] 1.0E-6
+            ORTHOGONAL_EPS 1.0E-6
+            WFN_RESTART_FILE_NAME ./TD-RESTART.tdwfn
+
+            &XC
+                # exchange-correlation functionals
+                &XC_FUNCTIONAL # PBE0
+                    &PBE
+                        SCALE_X 0.75
+                        SCALE_C 1.0
+                    &END PBE
+                &END XC_FUNCTIONAL
+
+                &HF # PBE0
+                    FRACTION 0.25
+                    &SCREENING
+                        EPS_SCHWARZ 1E-6
+                        SCREEN_ON_INITIAL_P T
+                    &END SCREENING
+                    &INTERACTION_POTENTIAL
+                        POTENTIAL_TYPE TRUNCATED
+                        CUTOFF_RADIUS 6.0
+                    &END INTERACTION_POTENTIAL
+                    &MEMORY
+                        MAX_MEMORY 1500
+                    &END MEMORY
+                &END HF
+            &END XC
+
+            &MGRID
+                NGRIDS 4
+                CUTOFF [Ry] 500
+                REL_CUTOFF 50
+            &END MGRID
+
+            #&PRINT MEDIUM
+            #    &MOS_MOLDEN
+            #        NDIGITS 9
+            #        GTO_KIND SPHERICAL
+            #    &END MOS_MOLDEN
+            #&END PRINT
+
+            #&DIPOLE_MOMENTS
+            #    DIPOLE_FORM VELOCITY
+            #&END DIPOLE_MOMENTS
+        &END TDDFPT
+    &END PROPERTIES
+&END FORCE_EVAL
