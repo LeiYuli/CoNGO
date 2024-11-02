@@ -1,0 +1,36 @@
+SYSTEM = Co-NGO
+# initial setup
+ISTART = 0
+ICHARG = 2
+PREC = Normal
+LREAL = .F.
+IVDW = 12
+LDIPOL = .T.
+IDIPOL = 3
+# PROCAR
+LORBIT = 11
+# atomic relax
+IBRION = 5 # vibration analysis with considering symmetry
+ISIF = 2
+NSW = 1
+POTIM = 0.01
+NFREE = 2
+MAXMIX = 60 # reuse the mixer between ionic steps, saves time
+# electron relax
+ENCUT = 500 eV
+NELM = 100
+EDIFF = 1E-8
+ALGO = N
+ISMEAR = 0
+SIGMA = 0.1
+#NELMDL = -15
+#NELMIN = 4
+# CHG WAVE
+LCHARG = .F.
+LWAVE = .F.
+# spin
+ISPIN = 2
+# symmetry
+ISYM = 0
+# accelerate
+NCORE = 1
